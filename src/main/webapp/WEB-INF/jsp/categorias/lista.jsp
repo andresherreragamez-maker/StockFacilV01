@@ -13,6 +13,29 @@
     <h1 class="h3">Categorías</h1>
     <a class="btn btn-primary" href="categorias?accion=nuevo">Nueva categoría</a>
 </div>
+
+
+<form method="get" action="categorias" class="mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <input
+            type="text"
+            name="nombre"
+            class="form-control"
+            style="max-width: 300px;"
+            placeholder="Buscar por nombre"
+            value="<c:out value='${param.nombre}'/>"
+        >
+
+        <button type="submit" class="btn btn-outline-primary">
+            Buscar
+        </button>
+
+        <a href="categorias" class="link-primary">
+            Limpiar
+        </a>
+    </div>
+</form>
+
 <table class="table table-striped bg-white">
     <thead>
         <tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th></th></tr>

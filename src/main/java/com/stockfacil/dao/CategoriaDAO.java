@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.stockfacil.dao;
 
 import com.stockfacil.config.Conexion;
@@ -94,4 +91,28 @@ public class CategoriaDAO {
             ps.executeUpdate();
         }
     }
+     
+public List<Categoria> buscar(String nombre) throws SQLException {
+
+    String sql = "SELECT * FROM categoria "
+               + "WHERE nombre LIKE ? "
+               + "ORDER BY nombre";
+
+    List<Categoria> lista = new ArrayList<>();
+
+    try (Connection con = Conexion.obtener();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setString(1, "%" + nombre + "%");
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        }
+    }
+
+    return lista;
+}
+
 }

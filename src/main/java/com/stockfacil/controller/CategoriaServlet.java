@@ -1,4 +1,5 @@
 package com.stockfacil.controller;
+
 import com.stockfacil.dao.CategoriaDAO;
 import com.stockfacil.model.Categoria;
 import javax.servlet.ServletException;
@@ -10,55 +11,67 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
- * Semana 6. Mantenimiento de categorías.
- * GET /categorias                     -> lista
- * GET /categorias?accion=nuevo        -> formulario vacío
- * GET /categorias?accion=editar&id=3  -> formulario con datos
- * POST /categorias (accion=guardar)     -> inserta o actualiza
- * POST /categorias (accion=desactivar)  -> desactiva
+ * Semana 6. Mantenimiento de categorías. GET /categorias -> lista GET
+ * /categorias?accion=nuevo -> formulario vacío GET
+ * /categorias?accion=editar&id=3 -> formulario con datos POST /categorias
+ * (accion=guardar) -> inserta o actualiza POST /categorias (accion=desactivar)
+ * -> desactiva
  */
 @WebServlet("/categorias")
 public class CategoriaServlet extends HttpServlet {
+
     private final CategoriaDAO dao = new CategoriaDAO();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String accion = req.getParameter("accion");
         try {
             if ("nuevo".equals(accion)) {
-               req.setAttribute("categoria", new Categoria());
-               mostrar("categorias/form", req, resp);
+                req.setAttribute("categoria", new Categoria());
+                mostrar("categorias/form", req, resp);
             } else if ("editar".equals(accion)) {
                 int id = Integer.parseInt(req.getParameter("id"));
-               req.setAttribute("categoria", dao.buscarPorId(id));
-               mostrar("categorias/form", req, resp);
+                req.setAttribute("categoria", dao.buscarPorId(id));
+                mostrar("categorias/form", req, resp);
+
             } else {
-               req.setAttribute("categorias", dao.lista());
-               mostrar("categorias/lista", req, resp);
+                String nombre = req.getParameter("nombre");
+
+                if (nombre != null && !nombre.trim().isEmpty()) {
+                    req.setAttribute("categorias", dao.buscar(nombre.trim()));
+                } else {
+                    req.setAttribute("categorias", dao.lista());
+                }
+
+                mostrar("categorias/lista", req, resp);
             }
+
         } catch (SQLException e) {
             throw new ServletException(e);
         }
     }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-       req.setCharacterEncoding("UTF-8");
+        req.setCharacterEncoding("UTF-8");
         String accion = req.getParameter("accion");
         try {
             if ("desactivar".equals(accion)) {
-               dao.desactivar(Integer.parseInt(req.getParameter("id")));
-               resp.sendRedirect("categorias");
+                dao.desactivar(Integer.parseInt(req.getParameter("id")));
+                resp.sendRedirect("categorias");
                 return;
             }
             // 1. Leer el formulario y pasarlo a un objeto
             Categoria c = new Categoria();
             String id = req.getParameter("idCategoria");
             c.setIdCategoria(id == null || id.isBlank() ? 0 : Integer.parseInt(id));
-           c.setNombre(req.getParameter("nombre").trim());
-           c.setDescripcion(req.getParameter("descripcion").trim());
-           c.setActivo(req.getParameter("activo") != null || c.getIdCategoria() == 0);
+            c.setNombre(req.getParameter("nombre").trim());
+            c.setDescripcion(req.getParameter("descripcion").trim());
+            c.setActivo(req.getParameter("activo") != null || c.getIdCategoria() == 0);
             // 2. Validar en el servidor
             List<String> errores = new ArrayList<>();
             if (c.getNombre().isEmpty()) {
@@ -68,9 +81,9 @@ public class CategoriaServlet extends HttpServlet {
             }
             // 3. Si hay errores, volver al formulario con los datos escritos
             if (!errores.isEmpty()) {
-               req.setAttribute("errores", errores);
-               req.setAttribute("categoria", c);
-               mostrar("categorias/form", req, resp);
+                req.setAttribute("errores", errores);
+                req.setAttribute("categoria", c);
+                mostrar("categorias/form", req, resp);
                 return;
             }
             // 4. Guardar y volver a la lista
@@ -79,13 +92,15 @@ public class CategoriaServlet extends HttpServlet {
             } else {
                 dao.actualizar(c);
             }
-           resp.sendRedirect("categorias");
+            resp.sendRedirect("categorias");
         } catch (SQLException e) {
             throw new ServletException(e);
         }
     }
+
     private void mostrar(String vista, HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-       req.getRequestDispatcher("/WEB-INF/jsp/" + vista + ".jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/jsp/" + vista + ".jsp").forward(req, resp);
     }
+
 }

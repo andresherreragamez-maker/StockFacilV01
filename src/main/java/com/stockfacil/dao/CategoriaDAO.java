@@ -92,6 +92,20 @@ public class CategoriaDAO {
         }
     }
      
+public List<Categoria> listarActivas() throws SQLException {
+    String sql = "SELECT * FROM CATEGORIA WHERE ACTIVO = 1 ORDER BY NOMBRE";
+    List<Categoria> lista = new ArrayList<>();
+    try(Connection con = Conexion.obtener();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()){
+                while(rs.next())
+                {
+                    lista.add(mapear(rs));
+                }
+            }
+            return lista;
+}
+    
 public List<Categoria> buscar(String nombre) throws SQLException {
 
     String sql = "SELECT * FROM categoria "
